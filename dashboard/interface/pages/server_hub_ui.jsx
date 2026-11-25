@@ -3,14 +3,14 @@ import React, { useState } from 'react';
 const MODULE_CATEGORIES = [
   {
     id: 'general',
-    category: 'Server & Bot Core',
+    category: 'Server & Core',
     title: 'General Settings',
-    description: 'Server overview, command prefix, locale, custom bot profile & linked role connections.',
+    description: 'Server overview, command prefix, locale, custom profile & linked role connections.',
     accent: 'from-indigo-500/20 to-violet-500/10 border-indigo-500/30 text-indigo-300',
     subButtons: [
       { subKey: 'overview', label: 'Server Overview' },
       { subKey: 'settings', label: 'Prefix & Locale' },
-      { subKey: 'profile', label: 'Custom Bot Profile' },
+      { subKey: 'profile', label: 'Custom Profile' },
       { subKey: 'connections', label: 'Role Connections' },
     ],
   },
@@ -42,7 +42,7 @@ const MODULE_CATEGORIES = [
     id: 'engagement',
     category: 'Activity & Progression',
     title: 'Engagement & VC',
-    description: 'XP leveling, leaderboards, role rewards, temp voice rooms, starboard & birthdays.',
+    description: 'Leveling, leaderboards, role rewards, temp voice rooms, starboard & birthdays.',
     accent: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/30 text-emerald-300',
     subButtons: [
       { subKey: 'levels', label: 'XP & Role Rewards' },
@@ -132,23 +132,21 @@ export default function ServerHubUI({
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
       <div className="rounded-2xl border border-[#1e263d] bg-gradient-to-br from-[#12182b] via-[#111625] to-[#19142c] p-6 shadow-xl">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-300">
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              Vexora Server Control Hub
+              Koya Control Hub • Server Studio
             </span>
             <h1 className="mt-2 text-2xl font-bold text-white">
               {guildMeta?.name || 'Discord Server'} — Module Center
             </h1>
             <p className="mt-1 text-sm text-slate-400">
-              Every module and sub-feature in one place. Click any button below to jump straight into its configuration.
+              Every module and sub-feature in one place. Click any button to open its panel directly.
             </p>
           </div>
 
-          {/* Quick Status Counters */}
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="rounded-xl border border-[#242e4a] bg-[#090d16] px-3.5 py-2.5">
               <div className="text-[11px] text-slate-400">Modules</div>
@@ -165,7 +163,6 @@ export default function ServerHubUI({
           </div>
         </div>
 
-        {/* Instant Switch Buttons */}
         <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           <button
             type="button"
@@ -221,7 +218,6 @@ export default function ServerHubUI({
         </div>
       </div>
 
-      {/* Category Filter Bar */}
       <div className="flex flex-wrap gap-2">
         {categoriesList.map((cat) => {
           const active = selectedCategory === cat;
@@ -242,7 +238,6 @@ export default function ServerHubUI({
         })}
       </div>
 
-      {/* All 9 Modules with Every Sub-Page Button Accessible */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {visibleModules.map((mod) => (
           <div
@@ -269,7 +264,6 @@ export default function ServerHubUI({
               <p className="mt-1 text-xs leading-relaxed text-slate-400">{mod.description}</p>
             </div>
 
-            {/* Every sub-feature inside this module is a direct clickable button */}
             <div className="mt-4 flex flex-wrap gap-1.5 border-t border-[#1c243b] pt-3.5">
               {mod.subButtons.map((btn) => (
                 <button
