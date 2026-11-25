@@ -1,0 +1,31 @@
+{
+  "workSuccess": [
+    "You ran a server scrim bracket and earned **{amount}** {currency}.",
+    "You tuned bot configs and cleaned up role permissions for **{amount}** {currency}.",
+    "You edited a highlight montage on schedule and got paid **{amount}** {currency}."
+  ],
+  "crimeSuccess": [
+    "You bypassed a locked vault door and walked away with **{amount}** {currency}.",
+    "You pulled off a clean midnight supply run for **{amount}** {currency}."
+  ],
+  "crimeFail": [
+    "Security tripped the alarm—you paid a **{fine}** {currency} fine.",
+    "You dropped your loot bag mid-escape and lost **{fine}** {currency}."
+  ],
+  "huntSuccess": [
+    "You tracked game in the northern ridge and sold your haul for **{amount}** {currency}.",
+    "Sharp shot in the mist—you bagged rewards worth **{amount}** {currency}."
+  ],
+  "fishSuccess": [
+    "You cast near the deep reef and hauled in catch worth **{amount}** {currency}.",
+    "Patient cast paid off—you caught rare gear worth **{amount}** {currency}."
+  ],
+  "robSuccess": [
+    "You slipped past {target.mention}’s guard and stole **{amount}** {currency}!",
+    "Clean pocket pick on {target.mention} for **{amount}** {currency}!"
+  ],
+  "robFail": [
+    "{target.mention} caught you red-handed! You paid **{fine}** {currency} in damages.",
+    "Tripwire alert! You were caught trying to rob {target.mention} and lost **{fine}** {currency}."
+  ]
+}
