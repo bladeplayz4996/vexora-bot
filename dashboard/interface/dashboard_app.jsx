@@ -607,4 +607,13 @@ export default function DashboardApp({ apiBase = '' }) {
         <SidebarNavUI
           activeSection={activeSection}
           activeSubPage={activeSubPage}
-     
+          onSelectNav={(sec, sub) => handleOpenModule(sec, sub)}
+        />
+
+        <main className="min-w-0 flex-1 p-5 sm:p-6">
+          <div className="mx-auto max-w-6xl">{renderActivePage()}</div>
+        </main>
+      </div>
+    </div>
+  );
+}
