@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import DashboardApp from './DashboardBridge.jsx';
+import DashboardApp from './AppEntry.jsx';
 
 const rootEl = document.getElementById('root');
 if (rootEl) {
