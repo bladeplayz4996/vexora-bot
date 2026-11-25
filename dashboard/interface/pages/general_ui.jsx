@@ -121,4 +121,228 @@ export default function GeneralUI({
               </label>
               <input
                 type="text"
-                
+                value={config.adminLogChannelId || ''}
+                onChange={(e) => updateField('adminLogChannelId', e.target.value)}
+                placeholder="123456789012345678"
+                className="w-full min-w-0 rounded-xl border border-white/10 bg-[#12182b] px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+              />
+            </div>
+
+            <div className="min-w-0">
+              <label className="block text-xs text-slate-400 mb-1">
+                Staff / Moderator Role ID
+              </label>
+              <input
+                type="text"
+                value={config.staffRoleId || ''}
+                onChange={(e) => updateField('staffRoleId', e.target.value)}
+                placeholder="123456789012345678"
+                className="w-full min-w-0 rounded-xl border border-white/10 bg-[#12182b] px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+              />
+            </div>
+
+            <div className="min-w-0">
+              <label className="block text-xs text-slate-400 mb-1">
+                Server Summary / Tagline
+              </label>
+              <textarea
+                rows={3}
+                maxLength={300}
+                value={config.serverOverviewNote || ''}
+                onChange={(e) => updateField('serverOverviewNote', e.target.value)}
+                placeholder="Optional server notes or operational summary..."
+                className="w-full min-w-0 rounded-xl border border-white/10 bg-[#12182b] px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+              />
+              <div className="mt-1 text-right text-[11px] text-slate-500">
+                {(config.serverOverviewNote || '').length}/300
+              </div>
+            </div>
+          </div>
+
+          <div className="min-w-0 rounded-2xl border border-white/10 bg-[#0e1322] p-4 sm:p-5 space-y-3 shadow-lg">
+            <h2 className="text-sm sm:text-base font-semibold text-white">
+              Command Execution Behavior
+            </h2>
+
+            <label className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#090d18] p-3.5 cursor-pointer">
+              <div className="min-w-0">
+                <div className="text-xs font-medium text-slate-200">
+                  Delete Trigger Messages
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  Clean up prefix command messages after execution.
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={Boolean(config.deleteTriggerMessages)}
+                onChange={(e) => updateField('deleteTriggerMessages', e.target.checked)}
+                className="h-4 w-4 accent-indigo-500 shrink-0"
+              />
+            </label>
+
+            <label className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#090d18] p-3.5 cursor-pointer">
+              <div className="min-w-0">
+                <div className="text-xs font-medium text-slate-200">
+                  Ephemeral Permission &amp; Error Replies
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  Show error warnings privately only to the command user.
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={config.ephemeralErrors ?? true}
+                onChange={(e) => updateField('ephemeralErrors', e.target.checked)}
+                className="h-4 w-4 accent-indigo-500 shrink-0"
+              />
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 2: Prefix & Locale */}
+      {tab === 'prefix-locale' && (
+        <div className="max-w-3xl rounded-2xl border border-white/10 bg-[#0e1322] p-4 sm:p-5 space-y-4 shadow-lg">
+          <div>
+            <h2 className="text-sm sm:text-base font-semibold text-white">
+              Prefix &amp; Language Locale
+            </h2>
+            <p className="text-xs text-slate-400">
+              Set the prefix used for text commands and default response language.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="min-w-0">
+              <label className="block text-xs text-slate-400 mb-1">
+                Command Prefix
+              </label>
+              <input
+                type="text"
+                maxLength={5}
+                value={config.prefix ?? '!'}
+                onChange={(e) => updateField('prefix', e.target.value)}
+                placeholder="!"
+                className="w-full min-w-0 rounded-xl border border-white/10 bg-[#12182b] px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+              />
+            </div>
+
+            <div className="min-w-0">
+              <label className="block text-xs text-slate-400 mb-1">
+                Default Locale
+              </label>
+              <select
+                value={config.locale || 'en-US'}
+                onChange={(e) => updateField('locale', e.target.value)}
+                className="w-full min-w-0 rounded-xl border border-white/10 bg-[#12182b] px-3 py-2 text-xs text-white focus:border-indigo-400 focus:outline-none"
+              >
+                <option value="en-US">English (US)</option>
+                <option value="en-GB">English (UK)</option>
+                <option value="en-IN">English (India)</option>
+                <option value="hi-IN">Hindi (हिन्दी)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 3: Custom Bot Profile */}
+      {tab === 'bot-profile' && (
+        <div className="max-w-3xl rounded-2xl border border-white/10 bg-[#0e1322] p-4 sm:p-5 space-y-4 shadow-lg">
+          <div>
+            <h2 className="text-sm sm:text-base font-semibold text-white">
+              Custom Bot Profile
+            </h2>
+            <p className="text-xs text-slate-400">
+              Customize how the bot appears in this server and in embeds.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="min-w-0">
+              <label className="block text-xs text-slate-400 mb-1">
+                Server Nickname
+              </label>
+              <input
+                type="text"
+                maxLength={32}
+                value={config.botNickname || ''}
+                onChange={(e) => updateField('botNickname', e.target.value)}
+                placeholder="Nexus Bot"
+                className="w-full min-w-0 rounded-xl border border-white/10 bg-[#12182b] px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+              />
+            </div>
+
+            <div className="min-w-0">
+              <label className="block text-xs text-slate-400 mb-1">
+                Embed Accent Color (Hex)
+              </label>
+              <div className="flex items-center gap-2 min-w-0">
+                <input
+                  type="color"
+                  value={/^#[0-9A-Fa-f]{6}$/.test(config.embedColor || '') ? config.embedColor : '#5865F2'}
+                  onChange={(e) => updateField('embedColor', e.target.value)}
+                  className="h-9 w-11 shrink-0 rounded-lg border border-white/10 bg-[#12182b] p-1 cursor-pointer"
+                />
+                <input
+                  type="text"
+                  maxLength={7}
+                  value={config.embedColor || '#5865F2'}
+                  onChange={(e) => updateField('embedColor', e.target.value)}
+                  placeholder="#5865F2"
+                  className="w-full min-w-0 rounded-xl border border-white/10 bg-[#12182b] px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="min-w-0">
+            <label className="block text-xs text-slate-400 mb-1">
+              Default Embed Footer
+            </label>
+            <input
+              type="text"
+              maxLength={120}
+              value={config.embedFooter || ''}
+              onChange={(e) => updateField('embedFooter', e.target.value)}
+              placeholder="Powered by Nexus"
+              className="w-full min-w-0 rounded-xl border border-white/10 bg-[#12182b] px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Tab 4: Role Connections */}
+      {tab === 'role-connections' && (
+        <div className="max-w-3xl rounded-2xl border border-white/10 bg-[#0e1322] p-4 sm:p-5 space-y-4 shadow-lg">
+          <div>
+            <h2 className="text-sm sm:text-base font-semibold text-white">
+              Linked Role Connections
+            </h2>
+            <p className="text-xs text-slate-400">
+              Map server activity or verification requirements to Discord Linked Role metadata.
+            </p>
+          </div>
+
+          <label className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#090d18] p-3.5 cursor-pointer">
+            <div className="min-w-0">
+              <div className="text-xs font-medium text-slate-200">
+                Enable Linked Role Metadata Sync
+              </div>
+              <div className="text-[11px] text-slate-400">
+                Allow connected roles to reflect verified server status and milestones.
+              </div>
+            </div>
+            <input
+              type="checkbox"
+              checked={Boolean(config.roleConnectionsEnabled)}
+              onChange={(e) => updateField('roleConnectionsEnabled', e.target.checked)}
+              className="h-4 w-4 accent-indigo-500 shrink-0"
+            />
+          </label>
+        </div>
+      )}
+    </div>
+  );
+}
