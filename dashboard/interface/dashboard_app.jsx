@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import TopbarUI from './layout/topbar_ui.jsx';
-import SidebarNavUI from './layout/sidebar_nav_ui.jsx';
+import React, { useState, useEffect } from 'react';
 import ServerHubUI from './pages/server_hub_ui.jsx';
 import GeneralUI from './pages/general_ui.jsx';
 import MessagingUI from './pages/messaging_ui.jsx';
@@ -12,608 +10,342 @@ import SocialFeedsUI from './pages/social_feeds_ui.jsx';
 import UtilitiesUI from './pages/utilities_ui.jsx';
 import EconomyEngineUI from './pages/economy_engine_ui.jsx';
 
-const DEFAULT_GUILD_CONFIG = {
-  settings: {
-    prefix: '!',
-    language: 'en-US',
-    timezone: 'Asia/Kolkata',
-    adminRoleIds: [],
-    staffRoleIds: [],
+const NAV_GROUPS = [
+  {
+    key: 'hub',
+    label: 'HUB',
+    defaultSubPage: 'overview',
+    items: [{ id: 'overview', label: 'Nexus Hub' }],
   },
-  customProfile: {
-    botName: 'Studio',
-    avatarUrl: '',
-    bio: '',
-    statusText: 'Watching {server.name}',
-    activityType: 'watching',
+  {
+    key: 'general',
+    label: 'GENERAL',
+    defaultSubPage: 'server-overview',
+    items: [
+      { id: 'server-overview', label: 'Server Overview' },
+      { id: 'prefix-locale', label: 'Prefix & Locale' },
+      { id: 'bot-profile', label: 'Custom Bot Profile' },
+      { id: 'role-connections', label: 'Role Connections' },
+    ],
   },
-  roleConnections: {
-    enabled: false,
-    linkedRoles: [],
+  {
+    key: 'messaging',
+    label: 'MESSAGING',
+    defaultSubPage: 'join-leave-boost',
+    items: [
+      { id: 'join-leave-boost', label: 'Join / Leave / Boost' },
+      { id: 'embed-builder', label: 'Embed & Action Builder' },
+      { id: 'auto-responders', label: 'Auto-Responders & Threads' },
+      { id: 'ticketing-tags', label: 'Ticketing & Tags' },
+    ],
   },
-  messaging: {
-    announcements: {},
-    autoResponders: [],
-    ticketing: { enabled: false, supportRoleIds: [], transcriptChannelId: null },
+  {
+    key: 'commands',
+    label: 'COMMANDS',
+    defaultSubPage: 'custom-commands',
+    items: [
+      { id: 'custom-commands', label: 'Custom Commands' },
+      { id: 'permissions-cooldowns', label: 'Permissions & Cooldowns' },
+    ],
   },
-  commands: {
-    customCommands: [],
-    overrides: {},
+  {
+    key: 'engagement',
+    label: 'ENGAGEMENT',
+    defaultSubPage: 'xp-rewards',
+    items: [
+      { id: 'xp-rewards', label: 'XP & Role Rewards' },
+      { id: 'temp-voice-stats', label: 'Temp Voice & Stats VC' },
+      { id: 'starboard-birthdays', label: 'Starboard & Birthdays' },
+    ],
   },
-  engagement: {
-    leveling: {
-      enabled: true,
-      xpMin: 15,
-      xpMax: 25,
-      xpCooldownSeconds: 45,
-      levelUpChannelId: null,
-      levelUpTemplate: '🎉 {user.mention} reached **Level {level}** with **{xp} XP**!',
-    },
-    tempVoice: { enabled: false, generatorChannelId: null, nameTemplate: "{user.username}'s Room" },
-    starboard: { enabled: false, emoji: '⭐', threshold: 3, channelId: null },
-    birthdays: { enabled: false, channelId: null, roleId: null },
+  {
+    key: 'roles',
+    label: 'ROLES',
+    defaultSubPage: 'auto-temp-persistent',
+    items: [
+      { id: 'auto-temp-persistent', label: 'Auto, Temp & Persistent' },
+      { id: 'reaction-panels', label: 'Reaction Panels & Factions' },
+    ],
   },
-  roles: {
-    autoRoles: [],
-    persistentRolesEnabled: true,
-    factions: [],
+  {
+    key: 'moderation',
+    label: 'MODERATION & SECURITY',
+    defaultSubPage: 'anti-nuke-backups',
+    items: [
+      { id: 'anti-nuke-backups', label: 'Anti-Nuke & Backups' },
+      { id: 'join-gate-automod', label: 'Join Gate & Heat AutoMod' },
+      { id: 'cases-warnings', label: 'Cases & Warnings' },
+    ],
   },
-  securityModeration: {
-    antiNuke: { enabled: true, autoRestoreOnNuke: false, logChannelId: null },
-    joinGate: {
-      enabled: true,
-      minAccountAgeHours: 24,
-      raidThresholdJoins: 8,
-      raidWindowSeconds: 10,
-      raidAction: 'kick',
-    },
-    automod: {
-      enabled: true,
-      heatThreshold: 100,
-      maxMentions: 5,
-      blockDiscordInvites: true,
-      blockPhishingLinks: true,
-      modLogChannelId: null,
-    },
+  {
+    key: 'social_feeds',
+    label: 'SOCIAL FEEDS',
+    defaultSubPage: 'feeds',
+    items: [{ id: 'feeds', label: 'YouTube & Twitch Feeds' }],
   },
-  socialFeeds: { youtube: [], twitch: [] },
-  utilities: { loveCalcEnabled: true, honeypotChannelId: null, auditLogChannelId: null },
-};
-
-const DEFAULT_ECONOMY_CONFIG = {
-  enabled: true,
-  currencyName: 'Coins',
-  currencySymbol: '🪙',
-  startingWallet: 250,
-  maxBankCapacity: 100000,
-  work: { min: 80, max: 220, cooldownSeconds: 1800 },
-  crime: { min: 250, max: 650, fineMin: 120, fineMax: 300, successRate: 0.55, cooldownSeconds: 3600 },
-  rob: { successRate: 0.4, maxStealPercent: 0.35, fineAmount: 200, cooldownSeconds: 3600 },
-};
-
-const QUICK_MODULES = [
-  { section: 'hub', sub: 'overview', label: 'Koya Hub' },
-  { section: 'general', sub: 'overview', label: 'General' },
-  { section: 'messaging', sub: 'announcements', label: 'Messaging' },
-  { section: 'commands', sub: 'custom', label: 'Commands' },
-  { section: 'engagement', sub: 'levels', label: 'Engagement' },
-  { section: 'roles', sub: 'core', label: 'Roles' },
-  { section: 'moderation', sub: 'security', label: 'Moderation' },
-  { section: 'social_feeds', sub: 'feeds', label: 'Feeds' },
-  { section: 'utilities', sub: 'tools', label: 'Utilities' },
-  { section: 'economy', sub: 'rules', label: 'Economy' },
+  {
+    key: 'utilities',
+    label: 'UTILITIES',
+    defaultSubPage: 'honeypot-lovecalc-logs',
+    items: [{ id: 'honeypot-lovecalc-logs', label: 'Honeypot, LoveCalc & Logs' }],
+  },
+  {
+    key: 'economy',
+    label: 'ECONOMY & SHOP',
+    defaultSubPage: 'currency-work-crime',
+    items: [
+      { id: 'currency-work-crime', label: 'Currency, Work, Crime & Rob' },
+      { id: 'shop-role-pickers', label: 'Shop & Role Pickers' },
+      { id: 'balances-audit', label: 'Balances & Audit Log' },
+    ],
+  },
 ];
 
-export default function DashboardApp({ apiBase = '' }) {
-  const [user, setUser] = useState(null);
-  const [guilds, setGuilds] = useState([]);
-  const [selectedGuildId, setSelectedGuildId] = useState('');
-
+export default function DashboardApp() {
+  const [config, setConfig] = useState({});
   const [activeSection, setActiveSection] = useState('hub');
   const [activeSubPage, setActiveSubPage] = useState('overview');
-
-  const [draftConfig, setDraftConfig] = useState(DEFAULT_GUILD_CONFIG);
-  const [savedConfig, setSavedConfig] = useState(DEFAULT_GUILD_CONFIG);
-
-  const [economyConfig, setEconomyConfig] = useState(DEFAULT_ECONOMY_CONFIG);
-  const [shopItems, setShopItems] = useState([]);
-  const [wallets, setWallets] = useState([]);
-  const [economyLogs, setEconomyLogs] = useState([]);
-
-  const [cases, setCases] = useState([]);
-  const [backups, setBackups] = useState([]);
-
-  const [isSaving, setIsSaving] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
 
-  const showToast = useCallback((type, text) => {
-    setToast({ type, text });
-    setTimeout(() => {
-      setToast((prev) => (prev?.text === text ? null : prev));
-    }, 3500);
-  }, []);
-
-  const hasUnsavedChanges = JSON.stringify(draftConfig) !== JSON.stringify(savedConfig);
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const res = await fetch(`${apiBase}/api/auth/me`, { credentials: 'include' });
-        const data = await res.json();
-        if (!active) return;
-        if (data?.authenticated && data.user) {
-          setUser(data.user);
-          const gList = Array.isArray(data.guilds) ? data.guilds : [];
-          setGuilds(gList);
-          if (gList.length > 0) {
-            setSelectedGuildId((prev) => prev || gList[0].id);
-          }
-        } else {
-          const previewGuilds = [
-            {
-              id: 'preview_guild_1',
-              name: 'Server HQ (Preview)',
-              icon: null,
-              owner: true,
-              botInGuild: true,
-              channels: [
-                { id: 'ch_welcome', name: 'welcome', type: 0 },
-                { id: 'ch_logs', name: 'mod-logs', type: 0 },
-                { id: 'ch_vc_gen', name: 'Join to Create VC', type: 2 },
-              ],
-              roles: [
-                { id: 'role_admin', name: 'Admin', color: '#ED4245' },
-                { id: 'role_mod', name: 'Moderator', color: '#5865F2' },
-                { id: 'role_vip', name: 'VIP Member', color: '#57F287' },
-              ],
-            },
-          ];
-          setGuilds(previewGuilds);
-          setSelectedGuildId('preview_guild_1');
-        }
-      } catch {
-        // Standalone fallback
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [apiBase]);
-
-  const loadGuildWorkspace = useCallback(
-    async (guildId) => {
-      if (!guildId || guildId.startsWith('preview_')) return;
-
-      try {
-        const [cfgRes, modRes, ecoRes] = await Promise.all([
-          fetch(`${apiBase}/api/guilds/${guildId}/config`, { credentials: 'include' }),
-          fetch(`${apiBase}/api/guilds/${guildId}/moderation`, { credentials: 'include' }),
-          fetch(`${apiBase}/api/economy/${guildId}`, { credentials: 'include' }),
-        ]);
-
-        if (cfgRes.ok) {
-          const cfgData = await cfgRes.json();
-          if (cfgData?.config) {
-            const merged = { ...DEFAULT_GUILD_CONFIG, ...cfgData.config };
-            setDraftConfig(merged);
-            setSavedConfig(merged);
-          }
-        }
-
-        if (modRes.ok) {
-          const modData = await modRes.json();
-          setCases(modData.cases || []);
-          setBackups(modData.backups || []);
-        }
-
-        if (ecoRes.ok) {
-          const ecoData = await ecoRes.json();
-          if (ecoData.config) setEconomyConfig({ ...DEFAULT_ECONOMY_CONFIG, ...ecoData.config });
-          setShopItems(ecoData.items || []);
-          setWallets(ecoData.wallets || []);
-          setEconomyLogs(ecoData.logs || []);
-        }
-      } catch (err) {
-        console.error('[Workspace Load Error]', err);
-      }
-    },
-    [apiBase]
-  );
-
-  useEffect(() => {
-    if (selectedGuildId) {
-      loadGuildWorkspace(selectedGuildId);
-    }
-  }, [selectedGuildId, loadGuildWorkspace]);
-
-  const handleOpenModule = (section, subPage = 'overview') => {
-    setActiveSection(section);
-    setActiveSubPage(subPage);
+  const notify = (text, type = 'info') => {
+    setToast({ text, type });
   };
 
-  const handleToggleSetting = (key, nextVal) => {
-    if (key === 'antiNuke') {
-      setDraftConfig((prev) => ({
-        ...prev,
-        securityModeration: {
-          ...prev.securityModeration,
-          antiNuke: { ...prev.securityModeration.antiNuke, enabled: nextVal },
-        },
-      }));
-    } else if (key === 'automod') {
-      setDraftConfig((prev) => ({
-        ...prev,
-        securityModeration: {
-          ...prev.securityModeration,
-          automod: { ...prev.securityModeration.automod, enabled: nextVal },
-        },
-      }));
-    } else if (key === 'leveling') {
-      setDraftConfig((prev) => ({
-        ...prev,
-        engagement: {
-          ...prev.engagement,
-          leveling: { ...prev.engagement.leveling, enabled: nextVal },
-        },
-      }));
-    } else if (key === 'economy') {
-      setEconomyConfig((prev) => ({ ...prev, enabled: nextVal }));
-      showToast('info', `Economy engine set to ${nextVal ? 'ON' : 'OFF'} (click Save Changes).`);
-    }
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  const handleUpdateConfig = (nextConfig) => {
+    setConfig(nextConfig);
+    setDirty(true);
   };
 
-  const handleLogin = async () => {
+  const handleDiscard = () => {
+    setDirty(false);
+    notify('Discarded unsaved changes.', 'info');
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
     try {
-      const res = await fetch(`${apiBase}/api/auth/login`, { credentials: 'include' });
-      const data = await res.json();
-      if (data?.authUrl) {
-        window.location.href = data.authUrl;
-      }
+      const res = await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      setDirty(false);
+      notify('Configuration saved.', 'success');
     } catch {
-      showToast('error', 'Could not start Discord OAuth login.');
-    }
-  };
-
-  const handleLogout = async () => {
-    await fetch(`${apiBase}/api/auth/logout`, { method: 'POST', credentials: 'include' }).catch(
-      () => {}
-    );
-    setUser(null);
-    showToast('info', 'Logged out of dashboard.');
-  };
-
-  const handleSaveChanges = async () => {
-    if (!selectedGuildId || selectedGuildId.startsWith('preview_')) {
-      setSavedConfig(draftConfig);
-      showToast('success', 'Saved changes to local preview state.');
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const [guildPut, ecoPut] = await Promise.all([
-        fetch(`${apiBase}/api/guilds/${selectedGuildId}/config`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ config: draftConfig }),
-        }),
-        fetch(`${apiBase}/api/economy/${selectedGuildId}/config`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ config: economyConfig }),
-        }),
-      ]);
-
-      if (!guildPut.ok) {
-        const errBody = await guildPut.json().catch(() => ({}));
-        throw new Error(errBody.error || 'Failed to save guild config');
-      }
-
-      const updatedGuild = await guildPut.json();
-      const nextSaved = { ...DEFAULT_GUILD_CONFIG, ...(updatedGuild.config || draftConfig) };
-      setDraftConfig(nextSaved);
-      setSavedConfig(nextSaved);
-
-      if (ecoPut.ok) {
-        const updatedEco = await ecoPut.json();
-        if (updatedEco.config) {
-          setEconomyConfig({ ...DEFAULT_ECONOMY_CONFIG, ...updatedEco.config });
-        }
-      }
-
-      showToast('success', 'Configuration saved & synced.');
-    } catch (err) {
-      showToast('error', err.message || 'Save failed.');
+      notify('Could not save config right now.', 'error');
     } finally {
-      setIsSaving(false);
+      setSaving(false);
     }
   };
 
-  const handleDiscardChanges = () => {
-    setDraftConfig(savedConfig);
-    showToast('info', 'Discarded unsaved changes.');
+  const handleSelectSection = (sectionKey, subPageOverride) => {
+    const group = NAV_GROUPS.find((g) => g.key === sectionKey);
+    const nextSub = subPageOverride || group?.defaultSubPage || 'overview';
+    setActiveSection(sectionKey);
+    setActiveSubPage(nextSub);
+    setSidebarOpen(false);
   };
 
-  const handleSaveShopItem = async (newItem) => {
-    if (!selectedGuildId || selectedGuildId.startsWith('preview_')) {
-      const localItem = { ...newItem, itemId: `local_${Date.now().toString(36)}` };
-      setShopItems((prev) => [localItem, ...prev]);
-      showToast('success', `Added "${newItem.name}" to preview shop.`);
-      return;
-    }
-
-    const res = await fetch(`${apiBase}/api/economy/${selectedGuildId}/shop`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(newItem),
-    });
-    const data = await res.json();
-    if (data?.ok && data.item) {
-      setShopItems((prev) => [data.item, ...prev]);
-      showToast('success', `Saved shop item "${data.item.name}".`);
+  const handleSelectSubPage = (subPageId, parentSectionKey) => {
+    setActiveSubPage(subPageId);
+    if (parentSectionKey) {
+      setActiveSection(parentSectionKey);
     } else {
-      showToast('error', data?.error || 'Could not save shop item.');
-    }
-  };
-
-  const handleDeleteShopItem = async (itemId) => {
-    if (!selectedGuildId || selectedGuildId.startsWith('preview_')) {
-      setShopItems((prev) => prev.filter((i) => (i.itemId || i.id) !== itemId));
-      return;
-    }
-
-    const res = await fetch(`${apiBase}/api/economy/${selectedGuildId}/shop/${itemId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
-    if (res.ok) {
-      setShopItems((prev) => prev.filter((i) => (i.itemId || i.id) !== itemId));
-      showToast('success', 'Removed shop item.');
-    }
-  };
-
-  const handleAdjustBalance = async (payload) => {
-    if (!selectedGuildId || selectedGuildId.startsWith('preview_')) {
-      showToast('info', 'Connect a live guild to adjust real member wallets.');
-      return;
-    }
-
-    const res = await fetch(`${apiBase}/api/economy/${selectedGuildId}/balances/adjust`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (data?.ok) {
-      showToast('success', `Updated ${payload.bucket} for ${payload.userId}.`);
-      loadGuildWorkspace(selectedGuildId);
-    } else {
-      showToast('error', data?.error || 'Balance adjustment failed.');
-    }
-  };
-
-  const handleTriggerBackup = async (payload) => {
-    if (!selectedGuildId || selectedGuildId.startsWith('preview_')) {
-      showToast('info', 'Backup snapshots require a live Discord guild connection.');
-      return;
-    }
-
-    const res = await fetch(`${apiBase}/api/guilds/${selectedGuildId}/backups`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (data?.ok) {
-      showToast(
-        'success',
-        payload.action === 'restore' ? 'Snapshot restore completed.' : 'Server snapshot created.'
+      const foundGroup = NAV_GROUPS.find((g) =>
+        g.items.some((item) => item.id === subPageId)
       );
-      loadGuildWorkspace(selectedGuildId);
-    } else {
-      showToast('error', data?.error || 'Backup operation failed.');
+      if (foundGroup) setActiveSection(foundGroup.key);
     }
+    setSidebarOpen(false);
   };
 
-  const activeGuild = guilds.find((g) => g.id === selectedGuildId) || null;
-  const channels = activeGuild?.channels || [];
-  const roles = activeGuild?.roles || [];
+  const sharedProps = {
+    config,
+    onChangeConfig: handleUpdateConfig,
+    activeSubPage,
+    onChangeSubPage: (sub) => handleSelectSubPage(sub, activeSection),
+    onNotify: notify,
+  };
 
   const renderActivePage = () => {
     switch (activeSection) {
       case 'hub':
         return (
           <ServerHubUI
-            guildMeta={activeGuild}
-            config={draftConfig}
-            economyConfig={economyConfig}
-            shopItems={shopItems}
-            cases={cases}
-            onOpenModule={handleOpenModule}
-            onToggleSetting={handleToggleSetting}
+            {...sharedProps}
+            onOpenSection={handleSelectSection}
+            onOpenSubPage={handleSelectSubPage}
           />
         );
       case 'general':
-        return (
-          <GeneralUI
-            activeSubPage={activeSubPage}
-            onChangeSubPage={(sub) => setActiveSubPage(sub)}
-            config={draftConfig}
-            guildMeta={activeGuild}
-            roles={roles}
-            onChangeConfig={setDraftConfig}
-          />
-        );
+        return <GeneralUI {...sharedProps} />;
       case 'messaging':
-        return (
-          <MessagingUI
-            activeSubPage={activeSubPage}
-            onChangeSubPage={(sub) => setActiveSubPage(sub)}
-            config={draftConfig}
-            channels={channels}
-            roles={roles}
-            guildMeta={activeGuild}
-            onChangeConfig={setDraftConfig}
-          />
-        );
+        return <MessagingUI {...sharedProps} />;
       case 'commands':
-        return (
-          <CommandsUI
-            activeSubPage={activeSubPage}
-            onChangeSubPage={(sub) => setActiveSubPage(sub)}
-            config={draftConfig}
-            onChangeConfig={setDraftConfig}
-          />
-        );
+        return <CommandsUI {...sharedProps} />;
       case 'engagement':
-        return (
-          <EngagementUI
-            activeSubPage={activeSubPage}
-            onChangeSubPage={(sub) => setActiveSubPage(sub)}
-            config={draftConfig}
-            channels={channels}
-            roles={roles}
-            onChangeConfig={setDraftConfig}
-          />
-        );
+        return <EngagementUI {...sharedProps} />;
       case 'roles':
-        return (
-          <RolesUI
-            activeSubPage={activeSubPage}
-            onChangeSubPage={(sub) => setActiveSubPage(sub)}
-            config={draftConfig}
-            roles={roles}
-            onChangeConfig={setDraftConfig}
-          />
-        );
+        return <RolesUI {...sharedProps} />;
       case 'moderation':
-        return (
-          <ModerationUI
-            activeSubPage={activeSubPage}
-            onChangeSubPage={(sub) => setActiveSubPage(sub)}
-            config={draftConfig}
-            channels={channels}
-            cases={cases}
-            backups={backups}
-            onChangeConfig={setDraftConfig}
-            onTriggerBackup={handleTriggerBackup}
-          />
-        );
+        return <ModerationUI {...sharedProps} />;
       case 'social_feeds':
-        return (
-          <SocialFeedsUI
-            activeSubPage={activeSubPage}
-            onChangeSubPage={(sub) => setActiveSubPage(sub)}
-            config={draftConfig}
-            channels={channels}
-            roles={roles}
-            onChangeConfig={setDraftConfig}
-          />
-        );
+        return <SocialFeedsUI {...sharedProps} />;
       case 'utilities':
-        return (
-          <UtilitiesUI
-            activeSubPage={activeSubPage}
-            onChangeSubPage={(sub) => setActiveSubPage(sub)}
-            config={draftConfig}
-            channels={channels}
-            onChangeConfig={setDraftConfig}
-          />
-        );
+        return <UtilitiesUI {...sharedProps} />;
       case 'economy':
-        return (
-          <EconomyEngineUI
-            activeSubPage={activeSubPage}
-            onChangeSubPage={(sub) => setActiveSubPage(sub)}
-            economyConfig={economyConfig}
-            shopItems={shopItems}
-            wallets={wallets}
-            logs={economyLogs}
-            roles={roles}
-            onChangeEconomyConfig={setEconomyConfig}
-            onSaveShopItem={handleSaveShopItem}
-            onDeleteShopItem={handleDeleteShopItem}
-            onAdjustBalance={handleAdjustBalance}
-          />
-        );
+        return <EconomyEngineUI {...sharedProps} />;
       default:
-        return null;
+        return <ServerHubUI {...sharedProps} onOpenSection={handleSelectSection} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#07090f] text-slate-100">
-      <TopbarUI
-        user={user}
-        guilds={guilds}
-        selectedGuildId={selectedGuildId}
-        onSelectGuild={(id) => {
-          if (hasUnsavedChanges && !window.confirm('Discard unsaved changes before switching server?')) {
-            return;
-          }
-          setSelectedGuildId(id);
-        }}
-        hasUnsavedChanges={hasUnsavedChanges}
-        isSaving={isSaving}
-        onSave={handleSaveChanges}
-        onDiscard={handleDiscardChanges}
-        onLogin={handleLogin}
-        onLogout={handleLogout}
-      />
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#070a13] text-slate-100">
+      {/* Top Bar */}
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0b0f1c]/95 backdrop-blur">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 sm:px-5">
+          <div className="flex items-center gap-2 min-w-0">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen((prev) => !prev)}
+              className="lg:hidden whitespace-nowrap shrink-0 rounded-lg border border-white/15 bg-[#12182b] px-2.5 py-1.5 text-xs font-semibold text-white"
+            >
+              {sidebarOpen ? 'Close' : 'Menu'}
+            </button>
 
-      <div className="overflow-x-auto border-b border-[#182036] bg-[#0c101b] px-4 py-2">
-        <div className="mx-auto flex max-w-7xl items-center gap-1.5">
-          {QUICK_MODULES.map((item) => {
-            const isActive = activeSection === item.section;
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-xs font-bold text-white">
+                N
+              </span>
+              <span className="truncate text-sm font-bold text-white">
+                Nexus Dashboard
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {dirty && (
+              <>
+                <span className="hidden sm:inline whitespace-nowrap rounded-full bg-amber-500/15 border border-amber-400/30 px-2.5 py-1 text-[11px] font-medium text-amber-300">
+                  Unsaved changes
+                </span>
+                <button
+                  type="button"
+                  onClick={handleDiscard}
+                  className="whitespace-nowrap shrink-0 rounded-lg border border-white/15 bg-[#12182b] px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/5"
+                >
+                  Discard
+                </button>
+              </>
+            )}
+
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="whitespace-nowrap shrink-0 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 px-3 py-1.5 text-xs font-semibold text-white"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Top Module Strip */}
+        <div className="flex items-center gap-1.5 overflow-x-auto border-t border-white/5 px-3 py-2 sm:px-5">
+          {NAV_GROUPS.map((group) => {
+            const isActive = activeSection === group.key;
             return (
               <button
-                key={item.section}
+                key={group.key}
                 type="button"
-                onClick={() => handleOpenModule(item.section, item.sub)}
-                className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                onClick={() => handleSelectSection(group.key)}
+                className={`whitespace-nowrap shrink-0 rounded-lg px-3 py-1 text-xs font-medium transition ${
                   isActive
-                    ? 'bg-indigo-600 text-white shadow shadow-indigo-600/30'
-                    : 'text-slate-300 hover:bg-[#151c30] hover:text-white'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-[#101627] text-slate-300 hover:bg-white/5'
                 }`}
               >
-                {item.label}
+                {group.items[0]?.label || group.label}
               </button>
             );
           })}
         </div>
+      </header>
+
+      {/* Body Layout: Drawer on Mobile, Fixed Sidebar on Desktop */}
+      <div className="relative flex min-h-[calc(100vh-6rem)] w-full max-w-full min-w-0">
+        {sidebarOpen && (
+          <div
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 z-30 bg-black/60 lg:hidden"
+          />
+        )}
+
+        <aside
+          className={`${
+            sidebarOpen ? 'fixed inset-y-0 left-0 z-40 block w-64' : 'hidden'
+          } lg:block lg:static lg:w-64 shrink-0 border-r border-white/10 bg-[#0a0e1a] p-3 overflow-y-auto`}
+        >
+          <div className="space-y-4">
+            {NAV_GROUPS.map((group) => (
+              <div key={group.key}>
+                <div className="px-2 pb-1 text-[10px] font-bold tracking-wider text-slate-400">
+                  {group.label}
+                </div>
+                <div className="space-y-0.5">
+                  {group.items.map((sub) => {
+                    const selected =
+                      activeSection === group.key && activeSubPage === sub.id;
+                    return (
+                      <button
+                        key={sub.id}
+                        type="button"
+                        onClick={() => handleSelectSubPage(sub.id, group.key)}
+                        className={`w-full text-left rounded-lg px-2.5 py-1.5 text-xs transition ${
+                          selected
+                            ? 'bg-indigo-600/25 text-indigo-200 font-semibold border border-indigo-400/30'
+                            : 'text-slate-300 hover:bg-white/5'
+                        }`}
+                      >
+                        {sub.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        <main className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden">
+          {renderActivePage()}
+        </main>
       </div>
 
       {toast && (
         <div
-          className={`fixed bottom-5 right-5 z-50 rounded-xl border px-4 py-2.5 text-xs font-medium shadow-xl ${
+          className={`fixed bottom-4 right-4 z-50 max-w-xs rounded-xl border px-4 py-2.5 text-xs font-medium shadow-xl ${
             toast.type === 'error'
-              ? 'border-rose-500/40 bg-rose-950/90 text-rose-200'
+              ? 'border-rose-500/40 bg-rose-950/95 text-rose-200'
               : toast.type === 'success'
-              ? 'border-emerald-500/40 bg-emerald-950/90 text-emerald-200'
+              ? 'border-emerald-500/40 bg-emerald-950/95 text-emerald-200'
               : 'border-indigo-500/40 bg-[#111625]/95 text-indigo-200'
           }`}
         >
           {toast.text}
         </div>
       )}
-
-      <div className="flex min-h-[calc(100vh-6.5rem)]">
-        <SidebarNavUI
-          activeSection={activeSection}
-          activeSubPage={activeSubPage}
-          onSelectNav={(sec, sub) => handleOpenModule(sec, sub)}
-        />
-
-        <main className="min-w-0 flex-1 p-5 sm:p-6">
-          <div className="mx-auto max-w-6xl">{renderActivePage()}</div>
-        </main>
-      </div>
     </div>
   );
 }
