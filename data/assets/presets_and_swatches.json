@@ -1,0 +1,51 @@
+{
+  "embedColors": [
+    { "name": "Discord Blurple", "hex": "#5865F2" },
+    { "name": "Emerald Green", "hex": "#57F287" },
+    { "name": "Warning Gold", "hex": "#FEE75C" },
+    { "name": "Crimson Alert", "hex": "#ED4245" },
+    { "name": "Nitro Magenta", "hex": "#F47FFF" },
+    { "name": "Cyber Cyan", "hex": "#00D2FF" },
+    { "name": "Tactical Slate", "hex": "#2B2D31" }
+  ],
+  "rankCardThemes": [
+    {
+      "id": "neon",
+      "label": "Cyber Neon",
+      "defaultAccent": "#00D2FF",
+      "badge": "NEON-GRID"
+    },
+    {
+      "id": "minimal",
+      "label": "Minimal Dark",
+      "defaultAccent": "#5865F2",
+      "badge": "CLEAN-UI"
+    },
+    {
+      "id": "tactical",
+      "label": "Tactical Glass",
+      "defaultAccent": "#57F287",
+      "badge": "SQUAD-OPS"
+    }
+  ],
+  "antiNukePresets": {
+    "relaxed": {
+      "channelDelete": { "max": 5, "windowMs": 60000 },
+      "roleDelete": { "max": 5, "windowMs": 60000 },
+      "memberBan": { "max": 8, "windowMs": 60000 },
+      "webhookCreate": { "max": 5, "windowMs": 60000 }
+    },
+    "balanced": {
+      "channelDelete": { "max": 3, "windowMs": 60000 },
+      "roleDelete": { "max": 3, "windowMs": 60000 },
+      "memberBan": { "max": 4, "windowMs": 60000 },
+      "webhookCreate": { "max": 3, "windowMs": 60000 }
+    },
+    "strict": {
+      "channelDelete": { "max": 1, "windowMs": 60000 },
+      "roleDelete": { "max": 1, "windowMs": 60000 },
+      "memberBan": { "max": 2, "windowMs": 60000 },
+      "webhookCreate": { "max": 1, "windowMs": 60000 }
+    }
+  }
+}
