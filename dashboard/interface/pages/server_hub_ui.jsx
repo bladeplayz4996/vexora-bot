@@ -1,283 +1,272 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-const MODULE_CATEGORIES = [
+const MODULES = [
   {
-    id: 'general',
-    category: 'Server & Core',
-    title: 'General Settings',
-    description: 'Server overview, command prefix, locale, custom profile & linked role connections.',
-    accent: 'from-indigo-500/20 to-violet-500/10 border-indigo-500/30 text-indigo-300',
-    subButtons: [
-      { subKey: 'overview', label: 'Server Overview' },
-      { subKey: 'settings', label: 'Prefix & Locale' },
-      { subKey: 'profile', label: 'Custom Profile' },
-      { subKey: 'connections', label: 'Role Connections' },
+    key: 'general',
+    title: 'General & Identity',
+    desc: 'Server overview, command prefix, locale, custom bot profile, and role connections.',
+    badge: 'Core',
+    toggleKey: 'botEnabled',
+    subPages: [
+      { id: 'server-overview', label: 'Server Overview' },
+      { id: 'prefix-locale', label: 'Prefix & Locale' },
+      { id: 'bot-profile', label: 'Custom Bot Profile' },
+      { id: 'role-connections', label: 'Role Connections' },
     ],
   },
   {
-    id: 'messaging',
-    category: 'Community & Alerts',
+    key: 'messaging',
     title: 'Messaging & Tickets',
-    description: 'Welcome/leave/boost alerts, embed builder, auto-responders, threads, tickets & tags.',
-    accent: 'from-sky-500/20 to-indigo-500/10 border-sky-500/30 text-sky-300',
-    subButtons: [
-      { subKey: 'announcements', label: 'Join / Leave / Boost' },
-      { subKey: 'builder', label: 'Embed & Action Builder' },
-      { subKey: 'responders', label: 'Auto-Responders & Threads' },
-      { subKey: 'tickets', label: 'Ticketing & Tags' },
+    desc: 'Welcome/leave/boost alerts, embed builder, auto-responders, threads, and support tickets.',
+    badge: 'Community',
+    toggleKey: 'messagingEnabled',
+    subPages: [
+      { id: 'join-leave-boost', label: 'Join / Leave / Boost' },
+      { id: 'embed-builder', label: 'Embed & Action Builder' },
+      { id: 'auto-responders', label: 'Auto-Responders & Threads' },
+      { id: 'ticketing-tags', label: 'Ticketing & Tags' },
     ],
   },
   {
-    id: 'commands',
-    category: 'Command Control',
-    title: 'Commands & Overrides',
-    description: 'Create custom commands and configure role/channel permissions & cooldowns.',
-    accent: 'from-purple-500/20 to-fuchsia-500/10 border-purple-500/30 text-purple-300',
-    subButtons: [
-      { subKey: 'custom', label: 'Custom Commands' },
-      { subKey: 'overrides', label: 'Permissions & Cooldowns' },
+    key: 'commands',
+    title: 'Commands & Access',
+    desc: 'Custom commands, global cooldowns, role access, and channel restrictions.',
+    badge: 'Automation',
+    toggleKey: 'commandsEnabled',
+    subPages: [
+      { id: 'custom-commands', label: 'Custom Commands' },
+      { id: 'permissions-cooldowns', label: 'Permissions & Cooldowns' },
     ],
   },
   {
-    id: 'engagement',
-    category: 'Activity & Progression',
-    title: 'Engagement & VC',
-    description: 'Leveling, leaderboards, role rewards, temp voice rooms, starboard & birthdays.',
-    accent: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/30 text-emerald-300',
-    subButtons: [
-      { subKey: 'levels', label: 'XP & Role Rewards' },
-      { subKey: 'voice', label: 'Temp Voice & Stats VC' },
-      { subKey: 'extras', label: 'Starboard & Birthdays' },
+    key: 'engagement',
+    title: 'Engagement & Voice',
+    desc: 'XP leveling, role rewards, temporary voice channels, server stats VC, and starboard.',
+    badge: 'Growth',
+    toggleKey: 'engagementEnabled',
+    subPages: [
+      { id: 'xp-rewards', label: 'XP & Role Rewards' },
+      { id: 'temp-voice-stats', label: 'Temp Voice & Stats VC' },
+      { id: 'starboard-birthdays', label: 'Starboard & Birthdays' },
     ],
   },
   {
-    id: 'roles',
-    category: 'Access & Identity',
-    title: 'Roles & Factions',
-    description: 'Auto, temporary & persistent roles, reaction/button role panels & team factions.',
-    accent: 'from-cyan-500/20 to-blue-500/10 border-cyan-500/30 text-cyan-300',
-    subButtons: [
-      { subKey: 'core', label: 'Auto, Temp & Persistent' },
-      { subKey: 'panels', label: 'Reaction Panels & Factions' },
+    key: 'roles',
+    title: 'Roles & Reaction Panels',
+    desc: 'Auto-assign roles on join, timed roles, persistent roles, and button/reaction panels.',
+    badge: 'Identity',
+    toggleKey: 'rolesEnabled',
+    subPages: [
+      { id: 'auto-temp-persistent', label: 'Auto, Temp & Persistent' },
+      { id: 'reaction-panels', label: 'Reaction Panels & Factions' },
     ],
   },
   {
-    id: 'moderation',
-    category: 'Protection & Enforcement',
+    key: 'moderation',
     title: 'Moderation & Security',
-    description: 'Anti-nuke shield, server snapshots/backups, raid lockdown, heat automod, cases & warns.',
-    accent: 'from-rose-500/20 to-orange-500/10 border-rose-500/30 text-rose-300',
-    subButtons: [
-      { subKey: 'security', label: 'Anti-Nuke & Backups' },
-      { subKey: 'automod', label: 'Join Gate & Heat AutoMod' },
-      { subKey: 'cases', label: 'Cases & Warnings' },
+    desc: 'Anti-nuke protection, server backups, join gate, heat-based AutoMod, and mod cases.',
+    badge: 'Security',
+    toggleKey: 'moderationEnabled',
+    subPages: [
+      { id: 'anti-nuke-backups', label: 'Anti-Nuke & Backups' },
+      { id: 'join-gate-automod', label: 'Join Gate & Heat AutoMod' },
+      { id: 'cases-warnings', label: 'Cases & Warnings' },
     ],
   },
   {
-    id: 'social_feeds',
-    category: 'Live Notifications',
-    title: 'Social Feeds',
-    description: 'Automatic YouTube upload/stream alerts and Twitch live notifications.',
-    accent: 'from-amber-500/20 to-yellow-500/10 border-amber-500/30 text-amber-300',
-    subButtons: [
-      { subKey: 'feeds', label: 'YouTube & Twitch Feeds' },
+    key: 'social_feeds',
+    title: 'Social Live Feeds',
+    desc: 'Automated YouTube upload alerts and Twitch live stream notifications with role pings.',
+    badge: 'Alerts',
+    toggleKey: 'socialFeedsEnabled',
+    subPages: [
+      { id: 'feeds', label: 'YouTube & Twitch Feeds' },
+      { id: 'alerts', label: 'Alert Formatting' },
     ],
   },
   {
-    id: 'utilities',
-    category: 'Tools & Audit',
-    title: 'Utilities & Logs',
-    description: 'Honeypot trap channels, LoveCalc, fun/game helpers & unified server audit logs.',
-    accent: 'from-violet-500/20 to-indigo-500/10 border-violet-500/30 text-violet-300',
-    subButtons: [
-      { subKey: 'tools', label: 'Honeypot, LoveCalc & Logs' },
+    key: 'utilities',
+    title: 'Utilities & Audit Logs',
+    desc: 'Spam honeypot traps, fun utilities, and full message/member/server audit logging.',
+    badge: 'Tools',
+    toggleKey: 'utilitiesEnabled',
+    subPages: [
+      { id: 'honeypot-lovecalc-logs', label: 'Honeypot, LoveCalc & Logs' },
     ],
   },
   {
-    id: 'economy',
-    category: 'Virtual Currency & Store',
+    key: 'economy',
     title: 'Economy & Shop Engine',
-    description: 'Currency symbol/wallet/bank rules, work/crime/rob, shop items, role pickers & balances.',
-    accent: 'from-lime-500/20 to-emerald-500/10 border-lime-500/30 text-lime-300',
-    subButtons: [
-      { subKey: 'rules', label: 'Currency, Work, Crime & Rob' },
-      { subKey: 'shop', label: 'Shop & Role Pickers' },
-      { subKey: 'balances', label: 'Balances & Audit Log' },
+    desc: 'Server currency, work/crime/rob cooldowns, role shop items, and balance audit logs.',
+    badge: 'Economy',
+    toggleKey: 'economyEnabled',
+    subPages: [
+      { id: 'currency-work-crime', label: 'Currency, Work, Crime & Rob' },
+      { id: 'shop-role-pickers', label: 'Shop & Role Pickers' },
+      { id: 'balances-audit', label: 'Balances & Audit Log' },
     ],
   },
 ];
 
 export default function ServerHubUI({
-  guildMeta,
-  config,
-  economyConfig,
-  shopItems = [],
-  cases = [],
-  onOpenModule,
-  onToggleSetting,
+  config = {},
+  onChangeConfig,
+  onOpenSection,
+  onOpenSubPage,
+  onNotify,
+  user,
+  guilds = [],
+  activeGuild,
+  onLoginDiscord,
 }) {
-  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const toggleModule = (key, title) => {
+    const nextValue = !(config[key] ?? true);
+    if (typeof onChangeConfig === 'function') {
+      onChangeConfig({
+        ...config,
+        [key]: nextValue,
+      });
+    }
+    if (typeof onNotify === 'function') {
+      onNotify(`${title} ${nextValue ? 'enabled' : 'disabled'}.`, 'info');
+    }
+  };
 
-  const categoriesList = ['ALL', ...MODULE_CATEGORIES.map((m) => m.category)];
-
-  const visibleModules =
-    selectedCategory === 'ALL'
-      ? MODULE_CATEGORIES
-      : MODULE_CATEGORIES.filter((m) => m.category === selectedCategory);
-
-  const antiNukeOn = Boolean(config?.securityModeration?.antiNuke?.enabled);
-  const automodOn = Boolean(config?.securityModeration?.automod?.enabled);
-  const levelingOn = Boolean(config?.engagement?.leveling?.enabled);
-  const economyOn = Boolean(economyConfig?.enabled);
+  const enabledCount = MODULES.filter((m) => config[m.toggleKey] ?? true).length;
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-[#1e263d] bg-gradient-to-br from-[#12182b] via-[#111625] to-[#19142c] p-6 shadow-xl">
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-300">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              Koya Control Hub • Server Studio
-            </span>
-            <h1 className="mt-2 text-2xl font-bold text-white">
-              {guildMeta?.name || 'Discord Server'} — Module Center
+    <div className="min-w-0 w-full max-w-full overflow-x-hidden px-3 py-4 sm:px-6 sm:py-6 text-slate-100">
+      {/* Auth & Connected Server Notice Banner */}
+      {!user && (
+        <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-indigo-400/35 bg-indigo-950/35 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <div className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
+              Discord Account Not Connected
+            </div>
+            <p className="mt-1 text-xs sm:text-sm text-slate-200">
+              Sign in with Discord to load your connected servers and manage per-guild settings directly.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onLoginDiscord}
+            className="whitespace-nowrap shrink-0 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] px-4 py-2 text-xs font-semibold text-white transition"
+          >
+            Login with Discord
+          </button>
+        </div>
+      )}
+
+      {/* Hero Header */}
+      <div className="mb-6 rounded-2xl border border-white/10 bg-gradient-to-br from-[#121933] via-[#0d1224] to-[#090d18] p-4 sm:p-6 shadow-xl">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-block rounded-full border border-indigo-400/30 bg-indigo-500/15 px-3 py-0.5 text-[11px] font-semibold text-indigo-200">
+                NEXUS CONTROL HUB
+              </span>
+              <span className="inline-block rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-slate-300">
+                {enabledCount}/{MODULES.length} Modules Active
+              </span>
+              <span className="inline-block rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-slate-300">
+                {activeGuild
+                  ? `Server: ${activeGuild.name}`
+                  : guilds.length > 0
+                  ? `${guilds.length} Servers Available`
+                  : 'No Guild Selected'}
+              </span>
+            </div>
+
+            <h1 className="mt-2.5 text-xl sm:text-2xl font-bold tracking-tight text-white">
+              Server Command Center
             </h1>
-            <p className="mt-1 text-sm text-slate-400">
-              Every module and sub-feature in one place. Click any button to open its panel directly.
+            <p className="mt-1 text-xs sm:text-sm text-slate-300 max-w-2xl">
+              Toggle modules on or off and jump directly into any sub-page across your connected Discord server.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-xl border border-[#242e4a] bg-[#090d16] px-3.5 py-2.5">
-              <div className="text-[11px] text-slate-400">Modules</div>
-              <div className="text-lg font-bold text-indigo-400">9</div>
-            </div>
-            <div className="rounded-xl border border-[#242e4a] bg-[#090d16] px-3.5 py-2.5">
-              <div className="text-[11px] text-slate-400">Shop Items</div>
-              <div className="text-lg font-bold text-emerald-400">{shopItems.length}</div>
-            </div>
-            <div className="rounded-xl border border-[#242e4a] bg-[#090d16] px-3.5 py-2.5">
-              <div className="text-[11px] text-slate-400">Mod Cases</div>
-              <div className="text-lg font-bold text-amber-400">{cases.length}</div>
-            </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => onOpenSubPage?.('server-overview', 'general')}
+              className="whitespace-nowrap shrink-0 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition"
+            >
+              Server Overview
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenSubPage?.('anti-nuke-backups', 'moderation')}
+              className="whitespace-nowrap shrink-0 rounded-xl border border-white/15 bg-[#131a30] hover:bg-white/5 px-4 py-2 text-xs font-semibold text-slate-200 transition"
+            >
+              Security Shield
+            </button>
           </div>
         </div>
-
-        <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-          <button
-            type="button"
-            onClick={() => onToggleSetting('antiNuke', !antiNukeOn)}
-            className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-semibold transition ${
-              antiNukeOn
-                ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-200'
-                : 'border-[#252f4b] bg-[#0b0f19] text-slate-300 hover:border-indigo-500/40'
-            }`}
-          >
-            <span>Anti-Nuke</span>
-            <span>{antiNukeOn ? 'ON' : 'OFF'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onToggleSetting('automod', !automodOn)}
-            className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-semibold transition ${
-              automodOn
-                ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-200'
-                : 'border-[#252f4b] bg-[#0b0f19] text-slate-300 hover:border-indigo-500/40'
-            }`}
-          >
-            <span>Heat AutoMod</span>
-            <span>{automodOn ? 'ON' : 'OFF'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onToggleSetting('leveling', !levelingOn)}
-            className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-semibold transition ${
-              levelingOn
-                ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-200'
-                : 'border-[#252f4b] bg-[#0b0f19] text-slate-300 hover:border-indigo-500/40'
-            }`}
-          >
-            <span>XP Leveling</span>
-            <span>{levelingOn ? 'ON' : 'OFF'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onToggleSetting('economy', !economyOn)}
-            className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-semibold transition ${
-              economyOn
-                ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-200'
-                : 'border-[#252f4b] bg-[#0b0f19] text-slate-300 hover:border-indigo-500/40'
-            }`}
-          >
-            <span>Economy Engine</span>
-            <span>{economyOn ? 'ON' : 'OFF'}</span>
-          </button>
-        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {categoriesList.map((cat) => {
-          const active = selectedCategory === cat;
+      {/* 9 Module Cards Grid */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 min-w-0">
+        {MODULES.map((mod) => {
+          const isEnabled = config[mod.toggleKey] ?? true;
           return (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setSelectedCategory(cat)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                active
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'border border-[#1e263d] bg-[#111625] text-slate-300 hover:border-indigo-500/40 hover:text-white'
-              }`}
+            <div
+              key={mod.key}
+              className="min-w-0 flex flex-col justify-between rounded-2xl border border-white/10 bg-[#0e1322] p-4 sm:p-5 shadow-lg"
             >
-              {cat === 'ALL' ? 'All Categories (9)' : cat}
-            </button>
-          );
-        })}
-      </div>
+              <div className="min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <span className="inline-block rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
+                      {mod.badge}
+                    </span>
+                    <h2 className="mt-1.5 text-base font-bold text-white">
+                      {mod.title}
+                    </h2>
+                  </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {visibleModules.map((mod) => (
-          <div
-            key={mod.id}
-            className="flex flex-col justify-between rounded-2xl border border-[#1e263d] bg-[#111625] p-5 transition hover:border-indigo-500/40"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-2">
-                <span
-                  className={`inline-block rounded-md border bg-gradient-to-r px-2.5 py-0.5 text-[11px] font-semibold ${mod.accent}`}
-                >
-                  {mod.category}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onOpenModule(mod.id, mod.subButtons[0].subKey)}
-                  className="text-xs font-semibold text-indigo-400 hover:text-indigo-300"
-                >
-                  Open Module →
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleModule(mod.toggleKey, mod.title)}
+                    className={`whitespace-nowrap shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold border transition ${
+                      isEnabled
+                        ? 'border-emerald-400/40 bg-emerald-500/20 text-emerald-200'
+                        : 'border-slate-600/50 bg-slate-800/70 text-slate-400'
+                    }`}
+                  >
+                    {isEnabled ? 'Active' : 'Paused'}
+                  </button>
+                </div>
+
+                <p className="mt-2 text-xs leading-relaxed text-slate-400">
+                  {mod.desc}
+                </p>
               </div>
 
-              <h2 className="mt-3 text-lg font-bold text-white">{mod.title}</h2>
-              <p className="mt-1 text-xs leading-relaxed text-slate-400">{mod.description}</p>
-            </div>
+              <div className="mt-4 pt-3 border-t border-white/10 space-y-2.5">
+                <div className="flex flex-wrap gap-1.5">
+                  {mod.subPages.map((sp) => (
+                    <button
+                      key={sp.id}
+                      type="button"
+                      onClick={() => onOpenSubPage?.(sp.id, mod.key)}
+                      className="whitespace-nowrap shrink-0 rounded-lg border border-white/10 bg-[#141b30] hover:border-indigo-400/40 hover:text-indigo-200 px-2.5 py-1 text-[11px] font-medium text-slate-300 transition"
+                    >
+                      {sp.label}
+                    </button>
+                  ))}
+                </div>
 
-            <div className="mt-4 flex flex-wrap gap-1.5 border-t border-[#1c243b] pt-3.5">
-              {mod.subButtons.map((btn) => (
                 <button
-                  key={`${mod.id}_${btn.subKey}`}
                   type="button"
-                  onClick={() => onOpenModule(mod.id, btn.subKey)}
-                  className="rounded-lg border border-[#263150] bg-[#0b0f19] px-2.5 py-1.5 text-xs font-medium text-slate-200 transition hover:border-indigo-500 hover:bg-indigo-600/20 hover:text-white"
+                  onClick={() => onOpenSection?.(mod.key)}
+                  className="w-full rounded-xl border border-indigo-500/30 bg-indigo-600/15 hover:bg-indigo-600/25 py-2 text-xs font-semibold text-indigo-200 transition"
                 >
-                  {btn.label}
+                  Open {mod.title}
                 </button>
-              ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
