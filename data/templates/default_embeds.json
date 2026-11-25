@@ -1,0 +1,128 @@
+{
+  "welcome": {
+    "mode": "embed",
+    "content": "",
+    "embed": {
+      "color": "#5865F2",
+      "author": {
+        "name": "{server.name}",
+        "url": "",
+        "iconUrl": "{server.icon}"
+      },
+      "title": "Welcome to {server.name}!",
+      "titleUrl": "",
+      "description": "Hey {user.mention}, glad to have you here! You are member **#{member.count}**.",
+      "fields": [
+        {
+          "name": "Account Created",
+          "value": "{user.created}",
+          "inline": true
+        },
+        {
+          "name": "Joined Server",
+          "value": "{user.joined}",
+          "inline": true
+        }
+      ],
+      "thumbnailUrl": "{user.avatar}",
+      "imageUrl": "",
+      "footer": {
+        "text": "User ID: {user.id}",
+        "iconUrl": "{bot.avatar}"
+      },
+      "timestamp": true
+    }
+  },
+  "leave": {
+    "mode": "embed",
+    "content": "",
+    "embed": {
+      "color": "#ED4245",
+      "author": {
+        "name": "{user.tag}",
+        "url": "",
+        "iconUrl": "{user.avatar}"
+      },
+      "title": "Member Left",
+      "titleUrl": "",
+      "description": "**{user.username}** left {server.name}. We now have **{member.count}** members.",
+      "fields": [],
+      "thumbnailUrl": "{user.avatar}",
+      "imageUrl": "",
+      "footer": {
+        "text": "User ID: {user.id}",
+        "iconUrl": ""
+      },
+      "timestamp": true
+    }
+  },
+  "boost": {
+    "mode": "embed",
+    "content": "🚀 {user.mention} just boosted **{server.name}**!",
+    "embed": {
+      "color": "#F47FFF",
+      "author": {
+        "name": "{user.tag}",
+        "url": "",
+        "iconUrl": "{user.avatar}"
+      },
+      "title": "Server Boosted!",
+      "titleUrl": "",
+      "description": "Thank you {user.mention} for boosting **{server.name}**! The server now has **{server.boosts}** boosts (Level **{server.boostTier}**).",
+      "fields": [],
+      "thumbnailUrl": "{user.avatar}",
+      "imageUrl": "",
+      "footer": {
+        "text": "Powered by Vexora",
+        "iconUrl": "{bot.avatar}"
+      },
+      "timestamp": true
+    }
+  },
+  "ticketWelcome": {
+    "mode": "embed",
+    "content": "{ticket.opener}",
+    "embed": {
+      "color": "#5865F2",
+      "author": {
+        "name": "Support Ticket #{ticket.number}",
+        "url": "",
+        "iconUrl": "{server.icon}"
+      },
+      "title": "How can we help you today?",
+      "titleUrl": "",
+      "description": "Opened by {ticket.opener} (`{ticket.id}`). Explain your request clearly and a staff member will assist you shortly.",
+      "fields": [],
+      "thumbnailUrl": "",
+      "imageUrl": "",
+      "footer": {
+        "text": "Click Close Ticket when your issue is resolved",
+        "iconUrl": ""
+      },
+      "timestamp": true
+    }
+  },
+  "socialFeedDefault": {
+    "mode": "embed",
+    "content": "",
+    "embed": {
+      "color": "#FF0000",
+      "author": {
+        "name": "{creator.name} • {platform}",
+        "url": "{url}",
+        "iconUrl": "{server.icon}"
+      },
+      "title": "{title}",
+      "titleUrl": "{url}",
+      "description": "**{creator.name}** just posted a new update on **{platform}**!\n\n{url}",
+      "fields": [],
+      "thumbnailUrl": "",
+      "imageUrl": "",
+      "footer": {
+        "text": "Vexora Social Feeds",
+        "iconUrl": "{bot.avatar}"
+      },
+      "timestamp": true
+    }
+  }
+}
