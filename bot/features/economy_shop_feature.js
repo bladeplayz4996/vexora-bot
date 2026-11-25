@@ -532,4 +532,7 @@ export default {
       .filter((i) => i.name.toLowerCase().includes((query || '').toLowerCase()))
       .map((i) => ({ name: `${i.name} (x${i.quantity})`, value: i.itemId }));
   },
-  getShopItem
+  getShopItems: (guildId) => shopItemsByGuild.get(guildId) || [],
+  setShopItems: (guildId, items) => shopItemsByGuild.set(guildId, items),
+  getEconomyLogs: (guildId) => economyLogsByGuild.get(guildId) || [],
+};
