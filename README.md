@@ -1,20 +1,31 @@
-# Vexora Bot & Dashboard
+# Vexora
 
-**Vexora** is a modular Discord utility, security, moderation, engagement, and economy bot paired with a web & app-activity dashboard—inspired by modern multi-system Discord bots.
+A modular Discord bot and web dashboard studio built with Node.js, Discord.js, Express, MongoDB/Mongoose, and React + Vite.
 
-## Core Pillars
-- **In-App Commands:** Slash (`/`) and prefix commands covering moderation, economy, shop & role pickers, leveling, mini-games, fun/color tools, and server utilities.
-- **Web & App-Activity Dashboard:** 9-module management interface (General, Messaging, Commands, Server Engagement, Roles, Moderation, Social Feeds, Utilities, and Economy Engine) with live embed preview, variable chips, and save/discard controls.
-- **Global Add-Ons:** Shared variable parser (`{user.mention}`, `{wallet}`, `{case.id}`, etc.), embed renderer (up to 4000-char descriptions, fields, author/footer media, and multi-embed payloads), permission/hierarchy guard, cooldown manager, and unified error/audit logger.
+## **Project Structure**
 
-## Project Layout
-- `bot/` — Discord client entry point, `global_addons/`, thin `commands/` handlers, and event/business logic in `features/`.
-- `dashboard/` — OAuth & guild/economy `api/` routes plus modular `interface/` layout, shared builders, and 9 feature pages.
-- `data/` — Consistent `schemas/`, `templates/`, and `assets/`.
+- `bot/`: Core Discord bot runtime (`index.js`), shared helpers (`global_addons/`), slash and prefix handlers (`commands/`), and event/background engines (`features/`).
+- `dashboard/`: REST API endpoints (`api/`) and React dashboard interface (`interface/`).
+- `data/`: Database schemas (`schemas/`), default templates and presets (`templates/`), and static assets (`assets/`).
+- `src/main.jsx`: React application entry point.
+- `index.html`: HTML template for the Vite frontend.
+- `server.js`: Express entry point running the API, database hydration, Discord bot client, and built frontend.
+- `package.json`: Project dependencies and npm scripts.
 
-## Quick Start
-1. Copy `.env.example` to `.env` and fill in your Discord bot token, client credentials, and MongoDB URI.
-2. Install dependencies:
+## **Features**
+
+- **Security & Moderation**: Anti-nuke protection, server backups and restores, join gates and anti-raid controls, heat-based automod, moderation cases, and audit logs.
+- **Engagement & Progression**: XP leveling, leaderboards, temporary voice channels, starboard, and birthday notifications.
+- **Roles & Messaging**: Auto, reaction, temporary, and persistent roles, factions, announcements, auto-responders, tickets, giveaways, and forms.
+- **Economy & Shop**: Wallets, bank limits, work, crime, and rob commands, custom shop items, role pickers, balance adjustments, and logs.
+- **Social Feeds & Utilities**: YouTube and Twitch watchers, fun and mini-game commands, and server/user utilities.
+- **Web Dashboard**: Guild switcher, unsaved-change save/discard controls, embed builder with live preview, role picker settings, and data tables.
+
+## **Setup & Run**
+
+ ### Install dependencies:
    ```bash
    npm install
-   
+   npm run build
+   npm start
+
