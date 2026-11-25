@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attachSession } from './dashboard/api/auth_routes.js';
 import apiRouter from './dashboard/api/index.js';
-import { startBotClient } from './bot/index.js';
+import * as botModule from './bot/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +44,29 @@ async function connectDatabase() {
   }
 }
 
+async function bootBotForServer() {
+  if (!process.env.DISCORD_TOKEN) {
+    console.warn('[Vexora Bot] DISCORD_TOKEN not set; starting Dashboard API in standalone mode.');
+    return null;
+  }
+
+  const starter =
+    botModule.startBotClient ||
+    botModule.startBot ||
+    botModule.initBot ||
+    (typeof botModule.default === 'function' ? botModule.default : null);
+
+  if (typeof starter === 'function') {
+    const result = await starter();
+    return result?.client || result || botModule.client || botModule.default || null;
+  }
+
+  return (
+    botModule.client ||
+    (botModule.default && typeof botModule.default === 'object' ? botModule.default : null)
+  );
+}
+
 async function main() {
   await connectDatabase();
 
@@ -60,14 +83,8 @@ async function main() {
   app.use(attachSession);
 
   // Start Discord Bot if token is provided
-  let discordClient = null;
-  if (process.env.DISCORD_TOKEN) {
-    discordClient = await startBotClient();
-    app.set('discordClient', discordClient);
-  } else {
-    console.warn('[Vexora Bot] DISCORD_TOKEN not set; starting Dashboard API in standalone mode.');
-    app.set('discordClient', null);
-  }
+  const discordClient = await bootBotForServer();
+  app.set('discordClient', discordClient);
 
   // Health check
   app.get('/api/health', (_req, res) => {
